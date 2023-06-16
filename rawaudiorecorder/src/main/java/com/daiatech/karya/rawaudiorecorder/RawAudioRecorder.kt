@@ -5,9 +5,9 @@ import android.media.AudioFormat
 import android.media.AudioRecord
 import android.media.MediaRecorder
 import android.media.audiofx.NoiseSuppressor
+import androidx.annotation.RequiresPermission
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -15,7 +15,9 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
 
-class RawAudioRecorder(
+class RawAudioRecorder
+@RequiresPermission(android.Manifest.permission.RECORD_AUDIO)
+constructor(
     private val listener: RecorderEventListener,
     private val coroutineScope: CoroutineScope
 ) {
@@ -56,7 +58,7 @@ class RawAudioRecorder(
 
         this.filePath = filePath
         this.recorderConfig = config
-        this.noiseSuppressorActive= suppressNoise
+        this.noiseSuppressorActive = suppressNoise
         listener.onRecorderStateChanged(RecorderState.PREPARED)
     }
 
@@ -65,7 +67,6 @@ class RawAudioRecorder(
      */
     @SuppressLint("MissingPermission")
     fun startRecording() {
-
         if (!isAudioRecorderInitialized()) {
             audioRecorder = AudioRecord(
                 MediaRecorder.AudioSource.MIC,
