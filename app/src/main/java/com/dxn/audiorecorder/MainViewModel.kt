@@ -1,20 +1,18 @@
 package com.dxn.audiorecorder
 
 import android.media.AudioFormat
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dxn.audiorecorder.recorder.RawAudioRecorder
-import com.dxn.audiorecorder.recorder.RecorderState
+import com.daiatech.karya.rawaudiorecorder.RawAudioRecorder
+import com.daiatech.karya.rawaudiorecorder.RecorderEventListener
+import com.daiatech.karya.rawaudiorecorder.RecorderState
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlin.random.Random
 
-class MainViewModel : ViewModel() {
+class MainViewModel : ViewModel(), RecorderEventListener {
 
     private val _amplitudes = MutableStateFlow(listOf<Float>())
     val amplitudes = _amplitudes.asStateFlow()
@@ -25,16 +23,7 @@ class MainViewModel : ViewModel() {
     private val _progress = MutableStateFlow(0)
     val progress = _progress.asStateFlow()
 
-    private var recorder: RawAudioRecorder = RawAudioRecorder(viewModelScope).apply {
-        onTimeElapsed = { progress -> _progress.update { progress.toInt() } }
-        onStateChangeListener = { state -> _recorderState.update { state } }
-        waveConfig.sampleRate = 44100
-        waveConfig.channels = AudioFormat.CHANNEL_IN_STEREO
-        waveConfig.audioEncoding = AudioFormat.ENCODING_PCM_8BIT
-        onAmplitudeListener = { amp ->
-            _amplitudes.update { it.appendAtEnd(listOf(amp.toFloat())) }
-        }
-    }
+    private var recorder: RawAudioRecorder = RawAudioRecorder(this, viewModelScope)
 
     fun createAudioRecorder(path: String) {
         recorder.prepare(path)
@@ -46,6 +35,20 @@ class MainViewModel : ViewModel() {
 
     fun stopRecording() {
         viewModelScope.launch(Dispatchers.IO) { recorder.stopRecording() }
+    }
+
+    override fun onAmplitudeChange(amplitude: Int) {
+        _amplitudes.update {
+            it.appendAtEnd(listOf(amplitude.toFloat()))
+        }
+    }
+
+    override fun onRecorderStateChanged(state: RecorderState) {
+        _recorderState.update { state }
+    }
+
+    override fun onProgress(timeMS: Long) {
+        _progress.update { timeMS.toInt() }
     }
 }
 

@@ -16,4 +16,4 @@ dependencyResolutionManagement {
 }
 rootProject.name = "AudioRecorder"
 include ':app'
-include ':recorder'
+include ':rawaudiorecorder'

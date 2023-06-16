@@ -1,30 +1,33 @@
-package com.dxn.audiorecorder.recorder
+package com.daiatech.karya.rawaudiorecorder
 
 import android.media.AudioFormat
 import java.io.File
 import java.io.RandomAccessFile
 
-internal class WaveHeaderWriter(private val filePath: String, private val waveConfig: WaveConfig) {
+internal class HeaderWriter(
+    private val filePath: String,
+    private val recorderConfig: RecorderConfig
+) {
 
     fun writeHeader() {
         val inputStream = File(filePath).inputStream()
         val totalAudioLen = inputStream.channel.size() - 44
         val totalDataLen = totalAudioLen + 36
-        val channels = if (waveConfig.channels == AudioFormat.CHANNEL_IN_MONO)
+        val channels = if (recorderConfig.channels == AudioFormat.CHANNEL_IN_MONO)
             1
         else
             2
 
-        val sampleRate = waveConfig.sampleRate.toLong()
+        val sampleRate = recorderConfig.sampleRate.toLong()
         val byteRate =
-            (bitPerSample(waveConfig.audioEncoding) * waveConfig.sampleRate * channels / 8).toLong()
+            (bitsPerSample(recorderConfig.audioEncoding) * recorderConfig.sampleRate * channels / 8).toLong()
         val header = getWavFileHeaderByteArray(
             totalAudioLen,
             totalDataLen,
             sampleRate,
             channels,
             byteRate,
-            bitPerSample(waveConfig.audioEncoding)
+            bitsPerSample(recorderConfig.audioEncoding)
         )
 
         val randomAccessFile = RandomAccessFile(File(filePath), "rw")
@@ -33,6 +36,8 @@ internal class WaveHeaderWriter(private val filePath: String, private val waveCo
         randomAccessFile.close()
     }
 
+    // https://gist.github.com/DrustZ/d3d3fc8fcc1067433db4dd3079f8d187#file-audiomediaoperation-java-L106
+    // https://stackoverflow.com/a/63113503/839733
     private fun getWavFileHeaderByteArray(
         totalAudioLen: Long, totalDataLen: Long, longSampleRate: Long,
         channels: Int, byteRate: Long, bitsPerSample: Int

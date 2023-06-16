@@ -18,7 +18,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import com.dxn.audiorecorder.recorder.RecorderState
+import com.daiatech.karya.rawaudiorecorder.RecorderState
 import com.dxn.audiorecorder.ui.theme.AudioRecorderTheme
 
 class MainActivity : ComponentActivity() {

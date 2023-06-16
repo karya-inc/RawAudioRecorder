@@ -1,4 +1,4 @@
-package com.dxn.audiorecorder.recorder
+package com.daiatech.karya.rawaudiorecorder
 
 import android.annotation.SuppressLint
 import android.media.AudioFormat
@@ -7,51 +7,35 @@ import android.media.MediaRecorder
 import android.media.audiofx.NoiseSuppressor
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
+
 class RawAudioRecorder(
-    private val scope: CoroutineScope,
+    private val listener: RecorderEventListener,
+    private val coroutineScope: CoroutineScope
+) {
 
     /**
      * Configuration for recording audio file.
      */
-    var waveConfig: WaveConfig = WaveConfig(),
-) {
-
-    private lateinit var filePath: String
-
-    /**
-     * Register a callback to be invoked in every recorded chunk of audio data
-     * to get max amplitude of that chunk.
-     */
-    var onAmplitudeListener: ((Int) -> Unit)? = null
-
-    /**
-     * Register a callback to get elapsed recording time in seconds
-     */
-    var onTimeElapsed: ((Long) -> Unit)? = null
-
-    /**
-     * Register a callback to be invoked in recording state changes
-     */
-    var onStateChangeListener: ((RecorderState) -> Unit)? = null
+    private var recorderConfig: RecorderConfig = RecorderConfig()
 
     /**
      * Activates Noise Suppressor during recording if the device implements noise
      * suppression.
      */
-    var noiseSuppressorActive: Boolean = false
+    private var noiseSuppressorActive: Boolean = false
 
     /**
      * The ID of the audio session this WaveRecorder belongs to.
      * The default value is -1 which means no audio session exist.
      */
-    var audioSessionId: Int = -1
-        private set
+    private var audioSessionId: Int = -1
 
     private var isRecording = false
     private var isPaused = false
@@ -59,12 +43,21 @@ class RawAudioRecorder(
     private var noiseSuppressor: NoiseSuppressor? = null
     private var timeModulus = 1
 
-    /**
-     * Prepares the audioRecorder to record and sets the output file path
-     */
-    fun prepare(outputFilePath: String) {
-        this.filePath = outputFilePath
-        onStateChangeListener?.let { it(RecorderState.PREPARED) }
+
+    private lateinit var filePath: String
+
+    fun prepare(
+        filePath: String,
+        config: RecorderConfig = RecorderConfig(),
+        suppressNoise: Boolean = false
+    ) {
+        if (isRecording)
+            throw IllegalStateException("Cannot change filePath when still recording.")
+
+        this.filePath = filePath
+        this.recorderConfig = config
+        this.noiseSuppressorActive= suppressNoise
+        listener.onRecorderStateChanged(RecorderState.PREPARED)
     }
 
     /**
@@ -76,17 +69,18 @@ class RawAudioRecorder(
         if (!isAudioRecorderInitialized()) {
             audioRecorder = AudioRecord(
                 MediaRecorder.AudioSource.MIC,
-                waveConfig.sampleRate,
-                waveConfig.channels,
-                waveConfig.audioEncoding,
+                recorderConfig.sampleRate,
+                recorderConfig.channels,
+                recorderConfig.audioEncoding,
                 AudioRecord.getMinBufferSize(
-                    waveConfig.sampleRate,
-                    waveConfig.channels,
-                    waveConfig.audioEncoding
+                    recorderConfig.sampleRate,
+                    recorderConfig.channels,
+                    recorderConfig.audioEncoding
                 )
             )
-            timeModulus = bitPerSample(waveConfig.audioEncoding) * waveConfig.sampleRate / 8
-            if (waveConfig.channels == AudioFormat.CHANNEL_IN_STEREO)
+            timeModulus =
+                bitsPerSample(recorderConfig.audioEncoding) * recorderConfig.sampleRate / 8
+            if (recorderConfig.channels == AudioFormat.CHANNEL_IN_STEREO)
                 timeModulus *= 2
 
             audioSessionId = audioRecorder.audioSessionId
@@ -99,29 +93,22 @@ class RawAudioRecorder(
                 noiseSuppressor = NoiseSuppressor.create(audioRecorder.audioSessionId)
             }
 
-            onStateChangeListener?.let {
-                it(RecorderState.RECORDING)
-            }
+            listener.onRecorderStateChanged(RecorderState.RECORDING)
 
-            scope.launch(Dispatchers.IO) {
+            coroutineScope.launch(Dispatchers.IO) {
                 writeAudioDataToStorage()
             }
         }
     }
 
-    private suspend fun writeAudioDataToStorage() = withContext(Dispatchers.IO) {
+    private suspend fun writeAudioDataToStorage() {
         val bufferSize = AudioRecord.getMinBufferSize(
-            waveConfig.sampleRate,
-            waveConfig.channels,
-            waveConfig.audioEncoding
+            recorderConfig.sampleRate,
+            recorderConfig.channels,
+            recorderConfig.audioEncoding
         )
         val data = ByteArray(bufferSize)
-        val file = File(filePath).apply {
-            // If file already exists, then delete and create a new file
-            if(exists()) delete()
-            createNewFile()
-        }
-
+        val file = File(filePath)
         val outputStream = file.outputStream()
         while (isRecording) {
             val operationStatus = audioRecorder.read(data, 0, bufferSize)
@@ -129,12 +116,11 @@ class RawAudioRecorder(
             if (AudioRecord.ERROR_INVALID_OPERATION != operationStatus) {
                 if (!isPaused) outputStream.write(data)
 
-                onAmplitudeListener?.let {
-                    it(calculateAmplitudeMax(data))
-                }
-                onTimeElapsed?.let {
+                withContext(Dispatchers.Main) {
+                    listener.onAmplitudeChange(calculateAmplitudeMax(data))
+
                     val audioLengthInSeconds: Long = file.length() / timeModulus
-                    it(audioLengthInSeconds)
+                    listener.onProgress(audioLengthInSeconds) // TODO: MS
                 }
             }
         }
@@ -151,24 +137,19 @@ class RawAudioRecorder(
         return shortData.maxOrNull()?.toInt() ?: 0
     }
 
-
     /**
      * Stops audio recorder and release resources then writes recorded file headers.
      */
     fun stopRecording() {
-
         if (isAudioRecorderInitialized()) {
             isRecording = false
             isPaused = false
             audioRecorder.stop()
             audioRecorder.release()
             audioSessionId = -1
-            WaveHeaderWriter(filePath, waveConfig).writeHeader()
-            onStateChangeListener?.let {
-                it(RecorderState.STOPPED)
-            }
+            HeaderWriter(filePath, recorderConfig).writeHeader()
+            listener.onRecorderStateChanged(RecorderState.STOPPED)
         }
-
     }
 
     private fun isAudioRecorderInitialized(): Boolean =
@@ -176,15 +157,11 @@ class RawAudioRecorder(
 
     fun pauseRecording() {
         isPaused = true
-        onStateChangeListener?.let {
-            it(RecorderState.PAUSED)
-        }
+        listener.onRecorderStateChanged(RecorderState.PAUSED)
     }
 
     fun resumeRecording() {
         isPaused = false
-        onStateChangeListener?.let {
-            it(RecorderState.RECORDING)
-        }
+        listener.onRecorderStateChanged(RecorderState.RECORDING)
     }
 }
