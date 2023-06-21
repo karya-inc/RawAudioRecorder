@@ -18,9 +18,9 @@ internal class HeaderWriter(
         else
             2
 
-        val sampleRate = recorderConfig.sampleRate.toLong()
+        val sampleRate = recorderConfig.sampleRate().toLong()
         val byteRate =
-            (bitsPerSample(recorderConfig.audioEncoding) * recorderConfig.sampleRate * channels / 8).toLong()
+            (bitsPerSample(recorderConfig.audioEncoding) * recorderConfig.sampleRate() * channels / 8).toLong()
         val header = getWavFileHeaderByteArray(
             totalAudioLen,
             totalDataLen,

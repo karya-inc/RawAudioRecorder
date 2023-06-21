@@ -70,17 +70,17 @@ constructor(
         if (!isAudioRecorderInitialized()) {
             audioRecorder = AudioRecord(
                 MediaRecorder.AudioSource.MIC,
-                recorderConfig.sampleRate,
+                recorderConfig.sampleRate(),
                 recorderConfig.channels,
-                recorderConfig.audioEncoding,
+                recorderConfig.audioEncoding(),
                 AudioRecord.getMinBufferSize(
-                    recorderConfig.sampleRate,
+                    recorderConfig.sampleRate(),
                     recorderConfig.channels,
-                    recorderConfig.audioEncoding
+                    recorderConfig.audioEncoding()
                 )
             )
             timeModulus =
-                bitsPerSample(recorderConfig.audioEncoding) * recorderConfig.sampleRate / 8
+                bitsPerSample(recorderConfig.audioEncoding) * recorderConfig.sampleRate() / 8
             if (recorderConfig.channels == AudioFormat.CHANNEL_IN_STEREO)
                 timeModulus *= 2
 
@@ -104,9 +104,9 @@ constructor(
 
     private suspend fun writeAudioDataToStorage() {
         val bufferSize = AudioRecord.getMinBufferSize(
-            recorderConfig.sampleRate,
+            recorderConfig.sampleRate(),
             recorderConfig.channels,
-            recorderConfig.audioEncoding
+            recorderConfig.audioEncoding()
         )
         val data = ByteArray(bufferSize)
         val file = File(filePath)
