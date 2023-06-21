@@ -1,7 +1,6 @@
 package com.dxn.audiorecorder
 
 import android.annotation.SuppressLint
-import android.media.AudioFormat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.daiatech.karya.rawaudiorecorder.RawAudioRecorder
@@ -21,8 +20,8 @@ class MainViewModel : ViewModel(), RecorderEventListener {
     private val _recorderState = MutableStateFlow<RecorderState?>(null)
     val recorderState = _recorderState.asStateFlow()
 
-    private val _progress = MutableStateFlow(0)
-    val progress = _progress.asStateFlow()
+    private val _progressMS = MutableStateFlow(0)
+    val progressMS = _progressMS.asStateFlow()
 
     @SuppressLint("MissingPermission")
     private var recorder: RawAudioRecorder = RawAudioRecorder(this, viewModelScope)
@@ -50,7 +49,7 @@ class MainViewModel : ViewModel(), RecorderEventListener {
     }
 
     override fun onProgress(timeMS: Long) {
-        _progress.update { timeMS.toInt() }
+        _progressMS.update { timeMS.toInt() }
     }
 }
 

@@ -8,6 +8,7 @@ import android.media.audiofx.NoiseSuppressor
 import androidx.annotation.RequiresPermission
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -108,25 +109,30 @@ constructor(
             recorderConfig.channels,
             recorderConfig.audioEncoding()
         )
+
         val data = ByteArray(bufferSize)
         val file = File(filePath)
         val outputStream = file.outputStream()
+
+        val publishResultJob = CoroutineScope(Dispatchers.Main).launch {
+            while (isRecording) {
+                delay(100) // publish the result every 100ms
+                listener.onAmplitudeChange(calculateAmplitudeMax(data))
+                val audioLengthInSeconds: Long = file.length() / timeModulus
+                listener.onProgress(audioLengthInSeconds.times(1000)) // TODO: MS
+            }
+        }
+
         while (isRecording) {
             val operationStatus = audioRecorder.read(data, 0, bufferSize)
 
             if (AudioRecord.ERROR_INVALID_OPERATION != operationStatus) {
                 if (!isPaused) outputStream.write(data)
-
-                withContext(Dispatchers.Main) {
-                    listener.onAmplitudeChange(calculateAmplitudeMax(data))
-
-                    val audioLengthInSeconds: Long = file.length() / timeModulus
-                    listener.onProgress(audioLengthInSeconds) // TODO: MS
-                }
             }
         }
 
         outputStream.close()
+        publishResultJob.cancel()
         noiseSuppressor?.release()
     }
 

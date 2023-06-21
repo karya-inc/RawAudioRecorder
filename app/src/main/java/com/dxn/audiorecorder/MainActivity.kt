@@ -43,11 +43,11 @@ class MainActivity : ComponentActivity() {
 
                         val state by viewModel.recorderState.collectAsState()
                         val amplitudes by viewModel.amplitudes.collectAsState()
-                        val progress by viewModel.progress.collectAsState()
+                        val progress by viewModel.progressMS.collectAsState()
 
                         AudioRecorderUi(
                             state = state,
-                            progress = progress,
+                            progress = progress.div(1000),
                             amplitudes = amplitudes,
                             onStart = { viewModel.startRecording() },
                             onStop = { viewModel.stopRecording() }
