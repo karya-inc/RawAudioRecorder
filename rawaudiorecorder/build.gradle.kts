@@ -3,6 +3,11 @@ plugins {
     id("org.jetbrains.kotlin.android")
 }
 
+apply {
+    from("publish-remote.gradle")
+}
+
+
 android {
     namespace = "com.daiatech.karya.rawaudiorecorder"
     compileSdk = 33
