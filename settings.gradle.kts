@@ -3,7 +3,7 @@ pluginManagement {
         google()
         mavenCentral()
         gradlePluginPortal()
-        maven { url "https://jitpack.io" }
+        maven(url = "https://jitpack.io")
     }
 }
 dependencyResolutionManagement {
@@ -11,9 +11,11 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-        maven { url "https://jitpack.io" }
+        maven(url = "https://jitpack.io")
     }
 }
+
 rootProject.name = "AudioRecorder"
-include ':app'
-include ':rawaudiorecorder'
+
+include(":app")
+include(":rawaudiorecorder")
