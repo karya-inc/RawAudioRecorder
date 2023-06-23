@@ -1,4 +1,4 @@
-package com.dxn.audiorecorder.ui.theme
+package com.daiatech.karya.recorder.ui.theme
 
 import android.app.Activity
 import android.os.Build

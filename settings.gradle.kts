@@ -17,5 +17,5 @@ dependencyResolutionManagement {
 
 rootProject.name = "AudioRecorder"
 
-include(":app")
 include(":rawaudiorecorder")
+include(":app")
