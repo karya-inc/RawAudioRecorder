@@ -30,7 +30,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -43,6 +42,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.daiatech.karya.recorder.ui.theme.AudioRecorderTheme
+import com.daiatech.karya.recorder.ui.utils.TimeUtils
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
@@ -100,9 +100,11 @@ private fun RecorderScreen(
                             text = "Saving recording as",
                             style = MaterialTheme.typography.headlineSmall
                         )
-                        Spacer(modifier = Modifier
-                            .fillMaxWidth()
-                            .height(8.dp))
+                        Spacer(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(8.dp)
+                        )
                         uiState.recordingFileName?.let {
                             Text(text = it, color = MaterialTheme.colorScheme.secondary)
                         }
@@ -130,14 +132,7 @@ private fun RecorderScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
 
-                val duration = with(uiState) {
-                    val secs = progress / 1000 // millis to s
-                    val mins = secs / 60
-                    val remSecs = secs % 60
-                    val m = "%02d".format(mins)
-                    val s = "%02d".format(remSecs)
-                    "$m : $s"
-                }
+                val duration = TimeUtils.millisecondsToTimeString(uiState.progressMs.toLong())
 
                 Text(
                     text = duration,

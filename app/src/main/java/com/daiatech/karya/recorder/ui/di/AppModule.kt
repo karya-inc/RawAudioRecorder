@@ -1,5 +1,6 @@
 package com.daiatech.karya.recorder.ui.di
 
+import com.daiatech.karya.recorder.ui.screens.list.RecordingsListVM
 import com.daiatech.karya.recorder.ui.screens.recorder.RecorderViewModel
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
@@ -15,4 +16,5 @@ val appModule = module {
     }
 
     viewModel { RecorderViewModel(get(named("recordingsDir"))) }
+    viewModel { RecordingsListVM(get(named("recordingsDir"))) }
 }

@@ -1,11 +1,9 @@
 package com.daiatech.karya.recorder.ui.screens.recorder
 
-import com.daiatech.karya.rawaudiorecorder.RecorderState
-
 data class UiState(
     val state: State,
     val recordingFileName: String?,
-    val progress: Int,
+    val progressMs: Long,
     val maxAmplitude: Int
 ) {
 

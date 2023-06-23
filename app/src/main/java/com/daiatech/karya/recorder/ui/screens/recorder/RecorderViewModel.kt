@@ -47,7 +47,7 @@ class RecorderViewModel(
 
         override fun onProgress(timeMS: Long) {
             Log.d("TAG", "onProgress: $timeMS")
-            _uiState.update { it.copy(progress = timeMS.toInt()) }
+            _uiState.update { it.copy(progressMs = timeMS) }
         }
 
     }
