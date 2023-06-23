@@ -1,5 +1,6 @@
 package com.daiatech.karya.recorder.ui.screens.recorder
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
@@ -79,9 +80,7 @@ private fun RecorderScreen(
         modifier = Modifier.fillMaxSize(),
         topBar = {
             TopAppBar(title = {
-                Text(
-                    text = uiState.recordingFileName,
-                )
+
             }
             )
         }
@@ -93,17 +92,29 @@ private fun RecorderScreen(
                     .padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(
-                    text = uiState.recordingFileName,
-
-                    )
+                AnimatedVisibility(visible = uiState.recordingFileName != null) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "Saving recording as",
+                            style = MaterialTheme.typography.headlineSmall
+                        )
+                        Spacer(modifier = Modifier
+                            .fillMaxWidth()
+                            .height(8.dp))
+                        uiState.recordingFileName?.let {
+                            Text(text = it, color = MaterialTheme.colorScheme.secondary)
+                        }
+                    }
+                }
             }
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.Center) {
                 RecordingAnim(
                     currentAmp = uiState.maxAmplitude.toFloat(),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(360.dp),
+                        .weight(1f),
                     barColor = MaterialTheme.colorScheme.primary,
                     barGap = 2.dp,
                     noOfBars = 50
@@ -119,17 +130,13 @@ private fun RecorderScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
 
-                val duration by remember {
-                    derivedStateOf {
-                        val secs = uiState.progress / 1000 // millis to s
-                        val remMillis = uiState.progress % 1000
-                        val mins = secs / 60
-                        val remSecs = secs % 60
-                        val m = "%02d".format(mins)
-                        val s = "%02d".format(remSecs)
-                        val ml = "%03d".format(remMillis)
-                        "$m : $s : $ml"
-                    }
+                val duration = with(uiState) {
+                    val secs = progress / 1000 // millis to s
+                    val mins = secs / 60
+                    val remSecs = secs % 60
+                    val m = "%02d".format(mins)
+                    val s = "%02d".format(remSecs)
+                    "$m : $s"
                 }
 
                 Text(
@@ -186,16 +193,11 @@ private fun RecorderScreen(
                         contentPadding = PaddingValues(32.dp),
                         modifier = Modifier.weight(1f)
                     ) {
-
-                        if (uiState.isRecording || uiState.isPaused) {
-                            Text(text = "Stop")
-                        }
-
                         when (uiState.state) {
                             UiState.State.INITIAL -> Text(text = "Start")
-                            UiState.State.RECORDING, UiState.State.PAUSED -> {
+                            UiState.State.RECORDING, UiState.State.PAUSED ->
                                 Text(text = "Stop")
-                            }
+
                         }
                     }
 

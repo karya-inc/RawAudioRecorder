@@ -4,7 +4,7 @@ import com.daiatech.karya.rawaudiorecorder.RecorderState
 
 data class UiState(
     val state: State,
-    val recordingFileName: String,
+    val recordingFileName: String?,
     val progress: Int,
     val maxAmplitude: Int
 ) {
@@ -17,7 +17,7 @@ data class UiState(
     val isPaused = state == State.PAUSED
 
     companion object {
-        val EMPTY = UiState(State.INITIAL, "", 0, 0)
+        val EMPTY = UiState(State.INITIAL, null, 0, 0)
     }
 }
 

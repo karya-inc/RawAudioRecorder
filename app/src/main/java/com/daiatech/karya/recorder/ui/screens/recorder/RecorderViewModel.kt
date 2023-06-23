@@ -40,7 +40,7 @@ class RecorderViewModel(
                 }
 
                 RecorderState.STOPPED -> {
-                    _uiState.update { it.copy(state = UiState.State.INITIAL) }
+                    _uiState.update { UiState.EMPTY }
                 }
             }
         }
@@ -60,6 +60,7 @@ class RecorderViewModel(
         val audioFile = File(audioDirectoryPath, fileName)
         recorder.prepare(audioFile.path)
         recorder.startRecording()
+        _uiState.update { it.copy(recordingFileName = fileName) }
     }
 
     fun stopRecording() {
