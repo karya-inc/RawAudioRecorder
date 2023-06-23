@@ -154,7 +154,7 @@ private fun RecorderScreen(
                 ) {
 
                     TextButton(
-                        onClick = pause,
+                        onClick = { if (uiState.isRecording) pause() else if (uiState.isPaused) resume() },
                         modifier = Modifier.weight(1f),
                         enabled = uiState.isRecording || uiState.isPaused
                     ) {
