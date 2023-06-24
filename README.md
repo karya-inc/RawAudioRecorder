@@ -2,4 +2,23 @@
 
 # RawAudioRecorder
 
-A lightweight audio recording library which records in .wav format
+A lightweight audio recording library that records in .wav format
+
+
+# Gradle
+
+Kotlin: build.gradle.kts
+```kotlin
+dependencies {
+  implementation("com.github.karya-inc:rawaudiorecorder:<latest_release>")
+}
+```
+
+Groovy: build.gradle
+```kotlin
+dependencies {
+  implementation 'com.github.karya-inc:rawaudiorecorder:<latest_release>'
+}
+```
+
+# Usage
