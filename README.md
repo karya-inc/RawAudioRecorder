@@ -99,3 +99,9 @@ data class RecorderConfig(
 |               | AudioEncoding.PCM_32BIT, required 'sdk >= Build.VERSION_CODES.S'                 |
 |               |                                                                                  |
 | channels      | AudioFormat.CHANNEL_IN_MONO, other configurations from android.media.AudioFormat |
+
+# Sample App
+Checkout the sample [App](https://github.com/karya-inc/RawAudioRecorder/tree/main/app) for reference
+
+<img src='https://github.com/karya-inc/RawAudioRecorder/assets/69595691/5cd9c003-9b88-4c4e-943e-2ffae9e797ae' alt='sample1' width='256'/>
+<img src='https://github.com/karya-inc/RawAudioRecorder/assets/69595691/d4575a5d-cf95-4c2f-9cf9-48b285e2e271' alt='sample2' width='256'/>
