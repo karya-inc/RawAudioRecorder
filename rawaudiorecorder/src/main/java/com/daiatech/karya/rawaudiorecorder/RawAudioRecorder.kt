@@ -117,9 +117,11 @@ constructor(
         val publishResultJob = CoroutineScope(Dispatchers.Main).launch {
             while (isRecording) {
                 delay(100) // publish the result every 100ms
-                listener.onAmplitudeChange(calculateAmplitudeMax(data))
-                val audioLengthInSeconds: Long = file.length() / timeModulus
-                listener.onProgress(audioLengthInSeconds.times(1000)) // TODO: MS
+                if (!isPaused) {
+                    listener.onAmplitudeChange(calculateAmplitudeMax(data))
+                    val audioLengthInSeconds: Long = file.length() / timeModulus
+                    listener.onProgress(audioLengthInSeconds.times(1000)) // TODO: MS
+                }
             }
         }
 
