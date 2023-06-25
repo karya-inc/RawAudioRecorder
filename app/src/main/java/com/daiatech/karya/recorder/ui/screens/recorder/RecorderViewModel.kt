@@ -6,7 +6,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.daiatech.karya.rawaudiorecorder.RawAudioRecorder
 import com.daiatech.karya.rawaudiorecorder.RecorderEventListener
-import com.daiatech.karya.rawaudiorecorder.RecorderState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -21,35 +20,30 @@ class RecorderViewModel(
     val uiState = _uiState.asStateFlow()
 
     private val listener = object : RecorderEventListener {
-        override fun onAmplitudeChange(amplitude: Int) {
-            _uiState.update { it.copy(maxAmplitude = amplitude) }
+        override fun onPrepared() {
+            _uiState.update { it.copy(state = UiState.State.INITIAL) }
         }
 
-        override fun onRecorderStateChanged(state: RecorderState) {
-            when (state) {
-                RecorderState.PREPARED -> {
-                    _uiState.update { it.copy(state = UiState.State.INITIAL) }
-                }
-
-                RecorderState.RECORDING -> {
-                    _uiState.update { it.copy(state = UiState.State.RECORDING) }
-                }
-
-                RecorderState.PAUSED -> {
-                    _uiState.update { it.copy(state = UiState.State.PAUSED) }
-                }
-
-                RecorderState.STOPPED -> {
-                    _uiState.update { UiState.EMPTY }
-                }
-            }
+        override fun onStart() {
+            _uiState.update { it.copy(state = UiState.State.RECORDING) }
         }
 
-        override fun onProgress(timeMS: Long) {
-            Log.d("TAG", "onProgress: $timeMS")
-            _uiState.update { it.copy(progressMs = timeMS) }
+        override fun onPause() {
+            _uiState.update { it.copy(state = UiState.State.PAUSED) }
         }
 
+        override fun onResume() {
+            _uiState.update { it.copy(state = UiState.State.RECORDING) }
+        }
+
+        override fun onStop(durationMs: Long) {
+            _uiState.update { UiState.EMPTY }
+            Log.d("TAG", "onStop: $durationMs")
+        }
+
+        override fun onProgressUpdate(maxAmplitude: Int, duration: Long) {
+            _uiState.update { it.copy(maxAmplitude = maxAmplitude, progress = duration) }
+        }
     }
 
     @SuppressLint("MissingPermission")

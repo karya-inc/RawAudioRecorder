@@ -132,7 +132,7 @@ private fun RecorderScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
 
-                val duration = TimeUtils.millisecondsToTimeString(uiState.progressMs.toLong())
+                val duration = TimeUtils.secondsToTimeString(uiState.progress)
 
                 Text(
                     text = duration,

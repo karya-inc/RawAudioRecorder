@@ -10,7 +10,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.io.File
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -44,10 +43,12 @@ constructor(
     private var isPaused = false
     private lateinit var audioRecorder: AudioRecord
     private var noiseSuppressor: NoiseSuppressor? = null
-    private var timeModulus = 1
+    private var bytesPerSecond = 1
 
 
     private lateinit var filePath: String
+
+    private var recordedFileDurationMs: Long? = null
 
     fun prepare(
         filePath: String,
@@ -60,7 +61,7 @@ constructor(
         this.filePath = filePath
         this.recorderConfig = config
         this.noiseSuppressorActive = suppressNoise
-        listener.onRecorderStateChanged(RecorderState.PREPARED)
+        listener.onPrepared()
     }
 
     /**
@@ -80,10 +81,19 @@ constructor(
                     recorderConfig.audioEncoding()
                 )
             )
-            timeModulus =
+
+            /**
+             * Units: bitPerSample = bits/sample
+             *        sampleRate = samples/second (Hz)
+             *     => bytesPerSecond = bits/sample * samples/second
+             *                       = bytes/second
+             *
+             * [bytesPerSecond] = bitPerSample * sampleRate
+             */
+            bytesPerSecond =
                 bitsPerSample(recorderConfig.audioEncoding) * recorderConfig.sampleRate() / 8
             if (recorderConfig.channels == AudioFormat.CHANNEL_IN_STEREO)
-                timeModulus *= 2
+                bytesPerSecond *= 2
 
             audioSessionId = audioRecorder.audioSessionId
 
@@ -95,7 +105,7 @@ constructor(
                 noiseSuppressor = NoiseSuppressor.create(audioRecorder.audioSessionId)
             }
 
-            listener.onRecorderStateChanged(RecorderState.RECORDING)
+            listener.onStart()
 
             coroutineScope.launch(Dispatchers.IO) {
                 writeAudioDataToStorage()
@@ -116,11 +126,13 @@ constructor(
 
         val publishResultJob = CoroutineScope(Dispatchers.Main).launch {
             while (isRecording) {
-                delay(100) // publish the result every 100ms
+                delay(100) // publish the progress every 100ms
                 if (!isPaused) {
-                    listener.onAmplitudeChange(calculateAmplitudeMax(data))
-                    val audioLengthInSeconds: Long = file.length() / timeModulus
-                    listener.onProgress(audioLengthInSeconds.times(1000)) // TODO: MS
+                    val maxAmplitude = calculateAmplitudeMax(data)
+                    // file.length() = total number of bytes in the file,
+                    // no need to deduct the header size because it hasn't been added yet
+                    val progress: Long = file.length() / (bytesPerSecond)
+                    listener.onProgressUpdate(maxAmplitude, progress)
                 }
             }
         }
@@ -132,6 +144,11 @@ constructor(
                 if (!isPaused) outputStream.write(data)
             }
         }
+
+        // file.length() = total number of bytes in the file,
+        // no need to deduct the header size because it hasn't been added yet
+        recordedFileDurationMs =
+            (file.length().toDouble() / (bytesPerSecond) * 1000).toLong()
 
         outputStream.close()
         publishResultJob.cancel()
@@ -157,7 +174,7 @@ constructor(
             audioRecorder.release()
             audioSessionId = -1
             HeaderWriter(filePath, recorderConfig).writeHeader()
-            listener.onRecorderStateChanged(RecorderState.STOPPED)
+            listener.onStop(durationMs = recordedFileDurationMs!!)
         }
     }
 
@@ -166,11 +183,11 @@ constructor(
 
     fun pauseRecording() {
         isPaused = true
-        listener.onRecorderStateChanged(RecorderState.PAUSED)
+        listener.onPause()
     }
 
     fun resumeRecording() {
         isPaused = false
-        listener.onRecorderStateChanged(RecorderState.RECORDING)
+        listener.onResume()
     }
 }
