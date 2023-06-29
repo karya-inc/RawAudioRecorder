@@ -33,24 +33,27 @@ dependencies {
 
 Create an instance of RecorderEventListener
 ```kotlin
-val listener = object : RecorderEventListener {
-        override fun onAmplitudeChange(amplitude: Int) {
+private val listener = object : RecorderEventListener {
+        override fun onPause() {}
+        override fun onResume() {}
+
+        override fun onPrepared() {
            
         }
 
-        override fun onRecorderStateChanged(state: RecorderState) {
-            when (state) {
-                RecorderState.PREPARED -> { }
-                RecorderState.RECORDING -> { }
-                RecorderState.PAUSED -> { }
-                RecorderState.STOPPED -> { }
-            }
-        }
-
-        override fun onProgress(timeMS: Long) {
+        // maxAmplitude: Maximum amplitude in current chunk, duration: Time elapses in seconds
+        override fun onProgressUpdate(maxAmplitude: Int, duration: Long) {
             
         }
 
+        override fun onStart() {
+           
+        }
+
+        // durationMs: duration of the recorded file in milliseconds
+        override fun onStop(durationMs: Long) {
+           
+        }
     }
 ```
 
