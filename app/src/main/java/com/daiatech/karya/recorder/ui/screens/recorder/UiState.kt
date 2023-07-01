@@ -3,7 +3,7 @@ package com.daiatech.karya.recorder.ui.screens.recorder
 data class UiState(
     val state: State,
     val recordingFileName: String?,
-    val progressMs: Long,
+    val progress: Long,
     val maxAmplitude: Int
 ) {
 
