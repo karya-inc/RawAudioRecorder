@@ -63,10 +63,13 @@ dependencies {
     androidTestImplementation(composeBom)
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-tooling-preview") // For compose @Preview
-    implementation("androidx.compose.material3:material3:1.1.0")
+    implementation("androidx.compose.material3:material3:1.1.1")
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 
     // Koin for dependency injection
     implementation("io.insert-koin:koin-androidx-compose:3.3.0")
+
+    // Aplituda
+    implementation("com.github.lincollincol:amplituda:2.2.2")
 }

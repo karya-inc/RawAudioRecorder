@@ -1,7 +1,7 @@
 package com.daiatech.karya.recorder
 
 import android.app.Application
-import com.daiatech.karya.recorder.ui.di.appModule
+import com.daiatech.karya.recorder.di.appModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin

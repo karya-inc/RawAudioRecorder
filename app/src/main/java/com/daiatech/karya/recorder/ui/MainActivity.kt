@@ -9,6 +9,8 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.Modifier
+import com.daiatech.karya.recorder.RecorderApp
+import com.daiatech.karya.recorder.ui.navigation.RecorderAppNav
 import com.daiatech.karya.recorder.ui.screens.recorder.RecorderScreen
 import com.daiatech.karya.recorder.ui.theme.AudioRecorderTheme
 import java.io.File
@@ -25,7 +27,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    RecorderScreen()
+                    RecorderAppNav()
                 }
             }
         }
