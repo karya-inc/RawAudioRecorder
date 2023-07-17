@@ -42,12 +42,13 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.daiatech.karya.recorder.ui.theme.AudioRecorderTheme
-import com.daiatech.karya.recorder.ui.utils.TimeUtils
+import com.daiatech.karya.recorder.utils.TimeUtils
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun RecorderScreen(
-    viewModel: RecorderViewModel = koinViewModel()
+    viewModel: RecorderViewModel = koinViewModel(),
+    navigateToRecordingsList: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -56,10 +57,9 @@ fun RecorderScreen(
         start = viewModel::startRecording,
         stop = viewModel::stopRecording,
         pause = viewModel::pauseRecording,
-        resume = viewModel::resumeRecording
-    ) {
-
-    }
+        resume = viewModel::resumeRecording,
+        navigateToRecordingsList = navigateToRecordingsList
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

@@ -1,4 +1,4 @@
-package com.daiatech.karya.recorder.ui.utils
+package com.daiatech.karya.recorder.utils
 
 object TimeUtils {
     fun secondsToTimeString(seconds: Long): String {
