@@ -153,6 +153,10 @@ constructor(
         outputStream.close()
         publishResultJob.cancel()
         noiseSuppressor?.release()
+
+        // Once recording is stopped, write the header and notify the listener
+        HeaderWriter(filePath, recorderConfig).writeHeader()
+        listener.onStop(durationMs = recordedFileDurationMs!!)
     }
 
     private fun calculateAmplitudeMax(data: ByteArray): Int {
@@ -173,8 +177,6 @@ constructor(
             audioRecorder.stop()
             audioRecorder.release()
             audioSessionId = -1
-            HeaderWriter(filePath, recorderConfig).writeHeader()
-            listener.onStop(durationMs = recordedFileDurationMs!!)
         }
     }
 
