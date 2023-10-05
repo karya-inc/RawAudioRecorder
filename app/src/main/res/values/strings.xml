@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Recorder</string>
+    <string name="microphone_permission_needed">Microphone permission needed</string>
+    <string name="permission_denied_permanently">You\'ve permanently denied the microphone permissions. It is required to record audio. Please open settings and grant the permission.</string>
 </resources>

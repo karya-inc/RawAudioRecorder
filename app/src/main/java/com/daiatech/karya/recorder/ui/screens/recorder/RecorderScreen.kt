@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -38,23 +39,67 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import com.daiatech.karya.recorder.R
+import com.daiatech.karya.recorder.ui.MainActivity
 import com.daiatech.karya.recorder.ui.theme.AudioRecorderTheme
 import com.daiatech.karya.recorder.utils.TimeUtils
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberPermissionState
+import com.google.accompanist.permissions.shouldShowRationale
 import org.koin.androidx.compose.koinViewModel
 
+@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun RecorderScreen(
     viewModel: RecorderViewModel = koinViewModel(),
     navigateToRecordingsList: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val mainActivity = LocalContext.current as MainActivity
+    var showPermissionDeniedDialog by remember { mutableStateOf(false) }
+    val permissionState =
+        rememberPermissionState(permission = android.Manifest.permission.RECORD_AUDIO)
+
+    if (showPermissionDeniedDialog) {
+        AlertDialog(
+            onDismissRequest = { showPermissionDeniedDialog = false },
+            confirmButton = {
+                TextButton(onClick = { mainActivity.openAppSettings() }) {
+                    Text(text = "Open Settings")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showPermissionDeniedDialog = false }) {
+                    Text(text = "Dismiss")
+                }
+            },
+            title = {
+                Text(text = stringResource(R.string.microphone_permission_needed))
+            },
+            text = {
+                Text(text = stringResource(R.string.permission_denied_permanently))
+            }
+        )
+    }
 
     RecorderScreen(
         uiState = uiState,
-        start = viewModel::startRecording,
+        start = {
+            if (permissionState.status.isGranted) {
+                viewModel.startRecording()
+            } else if (permissionState.status.shouldShowRationale) {
+                permissionState.launchPermissionRequest()
+            } else {
+                showPermissionDeniedDialog = true
+            }
+        },
         stop = viewModel::stopRecording,
         pause = viewModel::pauseRecording,
         resume = viewModel::resumeRecording,
