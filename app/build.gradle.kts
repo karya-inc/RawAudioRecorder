@@ -72,4 +72,7 @@ dependencies {
 
     // Aplituda
     implementation("com.github.lincollincol:amplituda:2.2.2")
+
+    // Compose permissions
+    implementation("com.google.accompanist:accompanist-permissions:0.32.0")
 }
