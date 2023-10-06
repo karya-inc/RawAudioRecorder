@@ -75,4 +75,10 @@ dependencies {
 
     // Compose permissions
     implementation("com.google.accompanist:accompanist-permissions:0.32.0")
+
+    //
+    val media3Version = "1.1.1"
+    implementation("androidx.media3:media3-exoplayer:$media3Version")
+    implementation("androidx.media3:media3-exoplayer-dash:$media3Version")
+    implementation("androidx.media3:media3-datasource-cronet:$media3Version")
 }
