@@ -1,6 +1,7 @@
 package com.daiatech.karya.recorder.ui.screens.list
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -85,6 +86,7 @@ fun RecordingsListScreen(
                         progressMs = 0
                         isPlaying = false
                         duration = 0
+                        currentPlaying = null
                     }
 
                     ExoPlayer.STATE_READY -> {
@@ -171,15 +173,17 @@ fun RecordingsListScreen(
                 }
             }
 
-            currentPlaying?.let { recording ->
-                AudioPlayerUi(
-                    title = recording.name,
-                    isPlaying = isPlaying,
-                    currentPositionMs = progressMs,
-                    durationMS = duration,
-                    play = { exoPlayer.play() },
-                    pause = { exoPlayer.pause() }
-                )
+            AnimatedVisibility(visible = currentPlaying != null) {
+                currentPlaying?.let {
+                    AudioPlayerUi(
+                        title = currentPlaying!!.name,
+                        isPlaying = isPlaying,
+                        currentPositionMs = progressMs,
+                        durationMS = duration,
+                        play = { exoPlayer.play() },
+                        pause = { exoPlayer.pause() }
+                    )
+                }
             }
         }
     }
