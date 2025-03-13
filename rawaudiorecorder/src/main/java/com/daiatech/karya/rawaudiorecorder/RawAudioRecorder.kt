@@ -19,7 +19,6 @@ import java.io.File
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
-
 class RawAudioRecorder
 @RequiresPermission(android.Manifest.permission.RECORD_AUDIO)
 constructor(
@@ -84,6 +83,8 @@ constructor(
             recorderConfig.channels,
             recorderConfig.audioEncoding()
         )
+        val outputFile = File(this.filePath)
+        if(!outputFile.exists()) outputFile.createNewFile()
         listener.onPrepared()
         Log.d("TAG", "Prepared RawAudioRecorder")
 
