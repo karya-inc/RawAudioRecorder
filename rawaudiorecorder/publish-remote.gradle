@@ -2,7 +2,7 @@ apply plugin: 'maven-publish'
 apply plugin: 'signing'
 
 def PUBLISH_GROUP_ID = 'io.github.karya-inc'
-def PUBLISH_VERSION = '0.0.5'
+def PUBLISH_VERSION = '0.0.6'
 def PUBLISH_ARTIFACT_ID = 'rawaudiorecorder'
 
 task androidSourcesJar(type: Jar) {
