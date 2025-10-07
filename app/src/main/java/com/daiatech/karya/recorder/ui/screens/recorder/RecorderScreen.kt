@@ -231,7 +231,8 @@ private fun RecorderScreen(
                             }
                         },
                         contentPadding = PaddingValues(32.dp),
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.weight(1f),
+                        enabled = uiState.enableStop
                     ) {
                         when (uiState.state) {
                             UiState.State.INITIAL -> Text(text = "Start")
