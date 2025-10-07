@@ -187,12 +187,11 @@ constructor(
         val file = File(filePath)
         val outputStream = file.outputStream()
 
-        Log.d(TAG, "Saving pre-record to disk")
-        // add the pre-record buffer
-        preRecordBuffer.forEach { bufferByte ->
-            outputStream.write(bufferByte)
+        if(preRecordBuffer.isNotEmpty()) {
+            Log.d(TAG, "Saving pre-record to disk")
+            preRecordBuffer.forEach { outputStream.write(it) }
+            preRecordBuffer.clear()
         }
-
 
         val publishResultJob = coroutineScope.launch(Dispatchers.Main) {
             while (isRecording) {
@@ -221,7 +220,7 @@ constructor(
         recordedFileDurationMs =
             (file.length().toDouble() / (bytesPerSecond) * 1000).toLong()
 
-        Log.d(TAG, "Recording saved. Duration $recordedFileDurationMs")
+        Log.d(TAG, "Recording stopped: audio duration $recordedFileDurationMs")
         outputStream.close()
         publishResultJob.cancel()
         noiseSuppressor?.release()
