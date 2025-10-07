@@ -56,6 +56,7 @@ constructor(
     private var recordedFileDurationMs: Long? = null
 
     private var preRecordJob: Job? = null
+    private var recordingJob: Job? = null
     private var preRecordDurationMs: Int = 0
     private var postRecordDurationMs: Int = 0
     private var preRecordBufferSize: Int = 0
@@ -117,7 +118,7 @@ constructor(
 
             listener.onStart()
 
-            coroutineScope.launch {
+            recordingJob = coroutineScope.launch {
                 preRecordJob?.cancelAndJoin()
                 writeAudioDataToStorage()
             }
@@ -193,7 +194,7 @@ constructor(
         }
 
 
-        val publishResultJob = CoroutineScope(Dispatchers.Main).launch {
+        val publishResultJob = coroutineScope.launch(Dispatchers.Main) {
             while (isRecording) {
                 delay(100) // publish the progress every 100ms
                 if (!isPaused) {
@@ -220,6 +221,7 @@ constructor(
         recordedFileDurationMs =
             (file.length().toDouble() / (bytesPerSecond) * 1000).toLong()
 
+        Log.d("TAG", "Recording saved. Duration $recordedFileDurationMs")
         outputStream.close()
         publishResultJob.cancel()
         noiseSuppressor?.release()
@@ -239,6 +241,9 @@ constructor(
 
     /**
      * Stops audio recorder and release resources then writes recorded file headers.
+     *
+     * Ensure that this function is called synchronously.
+     * Concurrent call may result in [IllegalStateException]
      */
     fun stopRecording() {
         coroutineScope.launch {
@@ -246,6 +251,7 @@ constructor(
             if (isAudioRecorderInitialized()) {
                 isRecording = false
                 isPaused = false
+                recordingJob?.join() // wait for the read to finish, before stopping the audioRecorder
                 audioRecorder.stop()
                 audioRecorder.release()
                 audioSessionId = -1
