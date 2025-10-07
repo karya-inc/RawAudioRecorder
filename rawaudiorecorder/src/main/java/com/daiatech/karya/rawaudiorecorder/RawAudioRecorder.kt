@@ -87,7 +87,7 @@ constructor(
         val outputFile = File(this.filePath)
         if(!outputFile.exists()) outputFile.createNewFile()
         listener.onPrepared()
-        Log.d("TAG", "Prepared RawAudioRecorder")
+        Log.d(TAG, "Prepared RawAudioRecorder")
 
         if (enablePreRecording) {
             preRecordJob?.cancel()
@@ -101,7 +101,7 @@ constructor(
             initializeAudioRecord()
 
             preRecordJob = coroutineScope.launch { writeAudioDataToPreRecordBuffer() }
-            Log.d("TAG", "Started Pre-Recording")
+            Log.d(TAG, "Started Pre-Recording")
         }
     }
 
@@ -122,14 +122,14 @@ constructor(
                 preRecordJob?.cancelAndJoin()
                 writeAudioDataToStorage()
             }
-            Log.d("TAG", "Started Recording")
+            Log.d(TAG, "Started Recording")
         }
     }
 
 
     @SuppressLint("MissingPermission")
     private fun initializeAudioRecord() {
-        Log.d("TAG", "Initialized AudioRecord")
+        Log.d(TAG, "Initialized AudioRecord")
         audioRecorder = AudioRecord(
             MediaRecorder.AudioSource.MIC,
             recorderConfig.sampleRate(),
@@ -164,7 +164,7 @@ constructor(
     }
 
     private suspend fun writeAudioDataToPreRecordBuffer() = withContext(Dispatchers.IO) {
-        Log.d("TAG", "Writing data to pre-record buffer")
+        Log.d(TAG, "Writing data to pre-record buffer")
         // Initialize pre-record buffer with a byte array of size [preRecordBufferSize] filling it with empty ByteArray
         preRecordBuffer.clear()
 
@@ -187,7 +187,7 @@ constructor(
         val file = File(filePath)
         val outputStream = file.outputStream()
 
-        Log.d("TAG", "Saving pre-record to disk")
+        Log.d(TAG, "Saving pre-record to disk")
         // add the pre-record buffer
         preRecordBuffer.forEach { bufferByte ->
             outputStream.write(bufferByte)
@@ -207,7 +207,7 @@ constructor(
             }
         }
 
-        Log.d("TAG", "Saving recording to disk")
+        Log.d(TAG, "Saving recording to disk")
         while (isRecording) {
             val operationStatus = audioRecorder.read(data, 0, bufferSizeInBytes)
 
@@ -221,7 +221,7 @@ constructor(
         recordedFileDurationMs =
             (file.length().toDouble() / (bytesPerSecond) * 1000).toLong()
 
-        Log.d("TAG", "Recording saved. Duration $recordedFileDurationMs")
+        Log.d(TAG, "Recording saved. Duration $recordedFileDurationMs")
         outputStream.close()
         publishResultJob.cancel()
         noiseSuppressor?.release()
@@ -270,5 +270,9 @@ constructor(
     fun resumeRecording() {
         isPaused = false
         listener.onResume()
+    }
+    
+    companion object {
+        const val TAG = "RawAudioRecorder"
     }
 }
