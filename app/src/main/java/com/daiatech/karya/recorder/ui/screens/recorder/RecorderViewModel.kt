@@ -58,6 +58,8 @@ class RecorderViewModel(
     }
 
     fun stopRecording() {
+        // disable stop button to concurrently
+        _uiState.update { it.copy(enableStop = false) }
         recorder.stopRecording()
     }
 

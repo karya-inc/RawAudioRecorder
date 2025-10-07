@@ -4,7 +4,8 @@ data class UiState(
     val state: State,
     val recordingFileName: String?,
     val progress: Long,
-    val maxAmplitude: Int
+    val maxAmplitude: Int,
+    val enableStop: Boolean
 ) {
 
     enum class State {
@@ -15,7 +16,7 @@ data class UiState(
     val isPaused = state == State.PAUSED
 
     companion object {
-        val EMPTY = UiState(State.INITIAL, null, 0, 0)
+        val EMPTY = UiState(State.INITIAL, null, 0, 0, true)
     }
 }
 
