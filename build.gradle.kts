@@ -5,7 +5,3 @@ plugins {
     id("org.jetbrains.kotlin.android") version "1.8.10" apply false
     id("io.github.gradle-nexus.publish-plugin") version "1.1.0"
 }
-
-apply {
-    from("scripts/publish-root.gradle")
-}

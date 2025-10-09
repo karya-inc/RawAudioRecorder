@@ -7,7 +7,6 @@ pluginManagement {
     }
 }
 dependencyResolutionManagement {
-    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
         google()
         mavenCentral()
@@ -15,7 +14,7 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "AudioRecorder"
+rootProject.name = "rawaudiorecorder"
 
 include(":rawaudiorecorder")
 include(":app")
